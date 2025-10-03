@@ -11,6 +11,7 @@ import DONKIPage from './pages/DONKIPage';
 import ExoplanetsPage from './pages/ExoplanetsPage';
 import NASALibraryPage from './pages/NASALibraryPage';
 import EPICPage from './pages/EPICPage';
+import AboutPage from './pages/AboutPage';
 import LoadingSpinner from './components/LoadingSpinner';
 import CacheStatus from './components/CacheStatus';
 
@@ -42,6 +43,7 @@ const AppContent: React.FC = () => {
             <Route path="/exoplanets" element={<ExoplanetsPage />} />
             <Route path="/nasa-library" element={<NASALibraryPage />} />
             <Route path="/epic" element={<EPICPage />} />
+            <Route path="/about" element={<AboutPage />} />
           </Routes>
         </div>
       </motion.main>

@@ -41,31 +41,36 @@ const EPICPage: React.FC = () => {
       setLoading(true);
       setError(null);
       
+      console.log('🛰️ Fetching EPIC images for date:', date || 'latest');
       const data = await nasaApi.getEPICImages(date);
+      
       if (data && data.length > 0) {
         setEpicData(data);
         setCurrentIndex(0);
+        console.log('✅ EPIC images loaded successfully:', data.length, 'images');
       } else {
         // If no data for specific date, try to load recent images
         if (date) {
-          console.log('No images for specific date, trying recent images...');
+          console.log('🔄 No data for selected date, trying recent images...');
           const recentData = await nasaApi.getEPICImages();
           if (recentData && recentData.length > 0) {
             setEpicData(recentData);
             setCurrentIndex(0);
             setError('No images for selected date, showing recent images instead.');
+            console.log('✅ Recent EPIC images loaded:', recentData.length, 'images');
           } else {
-            setError('No EPIC images available. The service might be temporarily unavailable.');
+            setError('No EPIC images available. The EPIC API may be temporarily unavailable. Please try again later.');
             setEpicData([]);
           }
         } else {
-          setError('No EPIC images available. The service might be temporarily unavailable.');
+          setError('No EPIC images available. The EPIC API may be temporarily unavailable. Please try again later.');
           setEpicData([]);
         }
       }
     } catch (err) {
-      setError('Failed to fetch EPIC images. Please try again or select a different date.');
-      console.error('EPIC Error:', err);
+      console.error('❌ Error fetching EPIC images:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(`Failed to fetch EPIC images: ${errorMessage}. The EPIC API may be temporarily unavailable. Please try again later.`);
       setEpicData([]);
     } finally {
       setLoading(false);
@@ -229,7 +234,16 @@ const EPICPage: React.FC = () => {
             animate={{ opacity: 1 }}
             className="glass-card p-6 mb-8 border-red-500/50"
           >
-            <p className="text-red-400 text-center">{error}</p>
+            <div className="text-center">
+              <p className="text-red-400 mb-4">{error}</p>
+              <button
+                onClick={() => fetchEPICImages(selectedDate)}
+                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center space-x-2 mx-auto"
+              >
+                <FaSatellite className="mr-2" />
+                Retry
+              </button>
+            </div>
           </motion.div>
         )}
 

@@ -21,9 +21,7 @@ import {
   FaRocket as FaRocketIcon,
   FaStar,
   FaNewspaper,
-  FaExternalLinkAlt,
-  FaPlay,
-  FaDownload
+  FaExternalLinkAlt
 } from 'react-icons/fa';
 import { nasaApi } from '../services/nasaApi';
 import type { APODData, MarsRoverPhoto, ExoplanetData } from '../services/nasaApi';
@@ -215,10 +213,6 @@ const HomePage: React.FC = () => {
                 <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
               </Link>
               
-              <button className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 backdrop-blur-sm border border-white/20 flex items-center space-x-3">
-                <FaPlay className="text-sm" />
-                <span>Watch Demo</span>
-              </button>
             </motion.div>
           </div>
         </div>
@@ -543,10 +537,6 @@ const HomePage: React.FC = () => {
                 <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
               </Link>
               
-              <button className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 backdrop-blur-sm border border-white/20 flex items-center space-x-3">
-                <FaDownload className="text-sm" />
-                <span>Download App</span>
-              </button>
             </div>
           </div>
         </div>

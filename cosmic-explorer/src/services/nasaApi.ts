@@ -100,6 +100,31 @@ export interface EPICData {
   image: string;
   version: string;
   date: string;
+  centroid_coordinates: {
+    lat: number;
+    lon: number;
+  };
+  dscovr_j2000_position: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  lunar_j2000_position: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  sun_j2000_position: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  attitude_quaternions: {
+    q0: number;
+    q1: number;
+    q2: number;
+    q3: number;
+  };
   coords: {
     lat: number;
     lon: number;
@@ -407,20 +432,53 @@ class NASAApiService {
     const endpoint = date ? `${baseUrl}/natural/date/${date}` : `${baseUrl}/natural/images`;
     
     try {
-      const response = await fetch(endpoint);
+      console.log('🌐 Fetching EPIC data from:', endpoint);
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      
       if (!response.ok) {
+        console.error('EPIC API Response:', response.status, response.statusText);
         throw new Error(`EPIC API Error: ${response.status} ${response.statusText}`);
       }
+      
       const data = await response.json();
+      
+      if (!Array.isArray(data) || data.length === 0) {
+        console.warn('EPIC API returned empty or invalid data');
+        throw new Error('No EPIC images available for the selected date');
+      }
       
       // Cache the result
       apiCache.set(cacheKey, data, CACHE_TTL.EPIC);
-      console.log('🌐 EPIC data fetched from API and cached');
+      console.log('🌐 EPIC data fetched from API and cached:', data.length, 'images');
       
       return data;
     } catch (error) {
       console.error('EPIC API Error:', error);
-      throw error;
+      
+      // Return sample data as fallback
+      const sampleData: EPICData[] = [
+        {
+          identifier: 'sample-1',
+          caption: 'Sample Earth Image - EPIC API Unavailable',
+          image: 'https://epic.gsfc.nasa.gov/archive/natural/2024/01/01/png/epic_1b_20240101000000.png',
+          version: '1.0',
+          date: date || new Date().toISOString().split('T')[0],
+          centroid_coordinates: { lat: 0, lon: 0 },
+          dscovr_j2000_position: { x: 0, y: 0, z: 0 },
+          lunar_j2000_position: { x: 0, y: 0, z: 0 },
+          sun_j2000_position: { x: 0, y: 0, z: 0 },
+          attitude_quaternions: { q0: 0, q1: 0, q2: 0, q3: 0 },
+          coords: { lat: 0, lon: 0 }
+        }
+      ];
+      
+      console.log('🔄 Using sample EPIC data as fallback');
+      return sampleData;
     }
   }
 

@@ -15,7 +15,7 @@ A stunning, interactive React + TypeScript web application that brings NASA's va
 
 ```bash
 # Clone and run in 3 commands
-git clone https://github.com/talal-ahmed/cosmic-explorer.git
+git clone https://github.com/talal3idarus/cosmic-explorer.git
 cd cosmic-explorer
 npm install && npm run dev
 ```
@@ -379,8 +379,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Talal Ahmed Al Aidarus**
 - Final-year Software Engineering student at UTAS
 - Passionate about space, AI, and web development
-- [GitHub](https://github.com/talal-ahmed)
-- [LinkedIn](https://linkedin.com/in/talal-ahmed)
+- [GitHub](https://github.com/talal3idarus)
+- [LinkedIn](https://www.linkedin.com/in/talalalaidarus)
+- [Email](mailto:talalaidarus@gmail.com)
 
 ---
 
@@ -396,6 +397,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### 🌟 Star this repository if you found it helpful!
 
-[![GitHub stars](https://img.shields.io/github/stars/talal-ahmed/cosmic-explorer?style=social)](https://github.com/talal-ahmed/cosmic-explorer)
-[![GitHub forks](https://img.shields.io/github/forks/talal-ahmed/cosmic-explorer?style=social)](https://github.com/talal-ahmed/cosmic-explorer)
-[![GitHub watchers](https://img.shields.io/github/watchers/talal-ahmed/cosmic-explorer?style=social)](https://github.com/talal-ahmed/cosmic-explorer)
+[![GitHub stars](https://img.shields.io/github/stars/talal3idarus/cosmic-explorer?style=social)](https://github.com/talal3idarus/cosmic-explorer)
+[![GitHub forks](https://img.shields.io/github/forks/talal3idarus/cosmic-explorer?style=social)](https://github.com/talal3idarus/cosmic-explorer)
+[![GitHub watchers](https://img.shields.io/github/watchers/talal3idarus/cosmic-explorer?style=social)](https://github.com/talal3idarus/cosmic-explorer)

@@ -14,6 +14,7 @@ import {
   FaGlobe, 
   FaSearch, 
   FaSatellite,
+  FaUser,
   FaChevronLeft,
   FaChevronRight,
   FaExpand,
@@ -34,6 +35,7 @@ const Sidebar: React.FC = () => {
     { path: '/exoplanets', label: 'Exoplanets', icon: FaGlobe },
     { path: '/nasa-library', label: 'NASA Library', icon: FaSearch },
     { path: '/epic', label: 'EPIC', icon: FaSatellite },
+    { path: '/about', label: 'About', icon: FaUser },
   ];
 
   // Handle mobile behavior
