@@ -26,15 +26,76 @@ const DONKIPage: React.FC = () => {
   const [itemsPerPage] = useState(5);
 
   const eventTypes = [
-    { value: 'FLR', label: 'Solar Flares', description: 'Solar flare events' },
-    { value: 'CME', label: 'Coronal Mass Ejections', description: 'CME events' },
-    { value: 'GST', label: 'Geomagnetic Storms', description: 'Geomagnetic storm events' },
-    { value: 'RBE', label: 'Radiation Belt Enhancements', description: 'Radiation belt events' },
-    { value: 'SEP', label: 'Solar Energetic Particles', description: 'SEP events' },
-    { value: 'MPC', label: 'Magnetopause Crossings', description: 'Magnetopause events' },
-    { value: 'RBE', label: 'Radiation Belt Enhancements', description: 'Radiation belt events' },
-    { value: 'GST', label: 'Geomagnetic Storms', description: 'Geomagnetic storm events' }
+    { 
+      value: 'FLR', 
+      label: 'Solar Flares', 
+      description: 'Solar flare events and eruptions',
+      category: 'Solar Activity',
+      icon: '☀️',
+      color: 'text-red-400',
+      bgColor: 'bg-red-500/10',
+      borderColor: 'border-red-500/30'
+    },
+    { 
+      value: 'CME', 
+      label: 'Coronal Mass Ejections', 
+      description: 'Massive plasma ejections from the Sun',
+      category: 'Solar Activity',
+      icon: '💥',
+      color: 'text-orange-400',
+      bgColor: 'bg-orange-500/10',
+      borderColor: 'border-orange-500/30'
+    },
+    { 
+      value: 'GST', 
+      label: 'Geomagnetic Storms', 
+      description: 'Disturbances in Earth\'s magnetic field',
+      category: 'Geomagnetic',
+      icon: '⚡',
+      color: 'text-yellow-400',
+      bgColor: 'bg-yellow-500/10',
+      borderColor: 'border-yellow-500/30'
+    },
+    { 
+      value: 'RBE', 
+      label: 'Radiation Belt Enhancements', 
+      description: 'Increased radiation in Earth\'s belts',
+      category: 'Radiation',
+      icon: '🔋',
+      color: 'text-purple-400',
+      bgColor: 'bg-purple-500/10',
+      borderColor: 'border-purple-500/30'
+    },
+    { 
+      value: 'SEP', 
+      label: 'Solar Energetic Particles', 
+      description: 'High-energy particles from the Sun',
+      category: 'Radiation',
+      icon: '⚛️',
+      color: 'text-blue-400',
+      bgColor: 'bg-blue-500/10',
+      borderColor: 'border-blue-500/30'
+    },
+    { 
+      value: 'MPC', 
+      label: 'Magnetopause Crossings', 
+      description: 'Boundary crossings of Earth\'s magnetosphere',
+      category: 'Geomagnetic',
+      icon: '🌍',
+      color: 'text-green-400',
+      bgColor: 'bg-green-500/10',
+      borderColor: 'border-green-500/30'
+    }
   ];
+
+  // Group event types by category
+  const eventCategories = eventTypes.reduce((acc, eventType) => {
+    if (!acc[eventType.category]) {
+      acc[eventType.category] = [];
+    }
+    acc[eventType.category].push(eventType);
+    return acc;
+  }, {} as { [key: string]: typeof eventTypes });
 
   useEffect(() => {
     fetchDONKIData();
@@ -56,28 +117,13 @@ const DONKIPage: React.FC = () => {
     }
   };
 
-  const getEventTypeColor = (eventType: string) => {
-    const colors: { [key: string]: string } = {
-      'FLR': 'text-red-400',
-      'CME': 'text-orange-400',
-      'GST': 'text-yellow-400',
-      'RBE': 'text-purple-400',
-      'SEP': 'text-blue-400',
-      'MPC': 'text-green-400'
+  const getEventTypeInfo = (eventType: string) => {
+    return eventTypes.find(et => et.value === eventType) || {
+      color: 'text-gray-400',
+      icon: '🌌',
+      label: 'Unknown Event',
+      category: 'Unknown'
     };
-    return colors[eventType] || 'text-gray-400';
-  };
-
-  const getEventTypeIcon = (eventType: string) => {
-    const icons: { [key: string]: string } = {
-      'FLR': '☀️',
-      'CME': '💥',
-      'GST': '⚡',
-      'RBE': '🔋',
-      'SEP': '⚛️',
-      'MPC': '🌍'
-    };
-    return icons[eventType] || '🌌';
   };
 
   const formatDate = (dateString: string) => {
@@ -137,66 +183,68 @@ const DONKIPage: React.FC = () => {
           </p>
         </motion.div>
 
-        {/* Event Type Selector */}
+        {/* Event Type Selector - Compact */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="glass-card p-6 mb-8"
+          className="glass-card p-4 mb-6"
         >
-          <h2 className="text-2xl font-semibold mb-6 flex items-center">
-            <FaFilter className="text-blue-400 mr-3" />
+          <h2 className="text-lg font-semibold mb-4 flex items-center">
+            <FaFilter className="text-blue-400 mr-2" />
             Event Type
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {eventTypes.map((eventType) => (
-              <button
+              <motion.button
                 key={eventType.value}
                 onClick={() => setSelectedEventType(eventType.value)}
-                className={`p-4 rounded-lg border-2 transition-all duration-300 text-left ${
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`p-3 rounded-lg border transition-all duration-300 text-center group ${
                   selectedEventType === eventType.value
-                    ? 'border-blue-500 bg-blue-500/10 cosmic-glow'
-                    : 'border-white/20 hover:border-blue-400/50 hover:bg-blue-500/5'
+                    ? `${eventType.borderColor} ${eventType.bgColor}`
+                    : 'border-white/20 hover:border-white/40 hover:bg-white/5'
                 }`}
+                title={eventType.description}
               >
-                <div className="flex items-center space-x-3 mb-2">
-                  <span className="text-2xl">{getEventTypeIcon(eventType.value)}</span>
-                  <h3 className="font-semibold">{eventType.label}</h3>
+                <div className="text-xl mb-1">{eventType.icon}</div>
+                <div className={`text-xs font-medium ${eventType.color}`}>
+                  {eventType.label}
                 </div>
-                <p className="text-sm text-gray-400">{eventType.description}</p>
-              </button>
+              </motion.button>
             ))}
           </div>
         </motion.div>
 
-        {/* Statistics */}
+        {/* Statistics - Compact */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
         >
-          <div className="glass-card p-6 text-center">
-            <FaSun className="text-3xl text-yellow-400 mx-auto mb-2" />
-            <h3 className="text-2xl font-bold text-white">{donkiData.length}</h3>
-            <p className="text-gray-400">Total Events</p>
+          <div className="glass-card p-4 text-center">
+            <FaSun className="text-2xl text-yellow-400 mx-auto mb-2" />
+            <h3 className="text-xl font-bold text-white">{donkiData.length}</h3>
+            <p className="text-sm text-gray-400">Total Events</p>
           </div>
           
-          <div className="glass-card p-6 text-center">
-            <FaExclamationTriangle className="text-3xl text-red-400 mx-auto mb-2" />
-            <h3 className="text-2xl font-bold text-white">
+          <div className="glass-card p-4 text-center">
+            <FaExclamationTriangle className="text-2xl text-red-400 mx-auto mb-2" />
+            <h3 className="text-xl font-bold text-white">
               {donkiData.filter(event => event.classType?.includes('X')).length}
             </h3>
-            <p className="text-gray-400">High Intensity Events</p>
+            <p className="text-sm text-gray-400">High Intensity</p>
           </div>
           
-          <div className="glass-card p-6 text-center">
-            <FaGlobe className="text-3xl text-blue-400 mx-auto mb-2" />
-            <h3 className="text-2xl font-bold text-white">
+          <div className="glass-card p-4 text-center">
+            <FaGlobe className="text-2xl text-blue-400 mx-auto mb-2" />
+            <h3 className="text-xl font-bold text-white">
               {donkiData.filter(event => new Date(event.beginTime) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
             </h3>
-            <p className="text-gray-400">Recent Events (7 days)</p>
+            <p className="text-sm text-gray-400">Recent (7 days)</p>
           </div>
         </motion.div>
 
@@ -219,12 +267,19 @@ const DONKIPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="space-y-6"
           >
-            <h2 className="text-2xl font-semibold mb-6">
-              {eventTypes.find(et => et.value === selectedEventType)?.label} Events
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold flex items-center">
+                <span className="text-xl mr-2">{getEventTypeInfo(selectedEventType).icon}</span>
+                {getEventTypeInfo(selectedEventType).label} Events
+              </h2>
+              <div className="text-xs text-gray-400 bg-white/10 px-2 py-1 rounded">
+                {getEventTypeInfo(selectedEventType).category}
+              </div>
+            </div>
             
             {currentEvents.map((event, index) => {
               const severity = getSeverityLevel(selectedEventType, event.classType);
+              const eventInfo = getEventTypeInfo(selectedEventType);
               
               return (
                 <motion.div
@@ -232,58 +287,42 @@ const DONKIPage: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
-                  className="glass-card p-6 hover:scale-105 transition-all duration-300 cursor-pointer"
+                  className="glass-card p-4 hover:scale-105 transition-all duration-300 cursor-pointer group"
                   onClick={() => setSelectedEvent(event)}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <span className="text-2xl">{getEventTypeIcon(selectedEventType)}</span>
-                        <h3 className="text-xl font-semibold">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-lg">{eventInfo.icon}</span>
+                        <h3 className="text-lg font-semibold">
                           {event.classType || 'Space Weather Event'}
                         </h3>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${severity.color} bg-white/10`}>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${severity.color} bg-white/10`}>
                           {severity.level}
                         </span>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                         <div>
-                          <p className="text-sm text-gray-400">Begin Time</p>
-                          <p className="font-medium">{formatDate(event.beginTime)}</p>
+                          <p className="text-xs text-gray-400">Begin</p>
+                          <p className="font-medium">{new Date(event.beginTime).toLocaleDateString()}</p>
                         </div>
                         
                         <div>
-                          <p className="text-sm text-gray-400">Peak Time</p>
-                          <p className="font-medium">{formatDate(event.peakTime)}</p>
+                          <p className="text-xs text-gray-400">Peak</p>
+                          <p className="font-medium">{new Date(event.peakTime).toLocaleDateString()}</p>
                         </div>
                         
                         <div>
-                          <p className="text-sm text-gray-400">End Time</p>
-                          <p className="font-medium">{formatDate(event.endTime)}</p>
+                          <p className="text-xs text-gray-400">End</p>
+                          <p className="font-medium">{new Date(event.endTime).toLocaleDateString()}</p>
                         </div>
                       </div>
                       
                       {event.sourceLocation && (
-                        <div className="mb-4">
-                          <p className="text-sm text-gray-400">Source Location</p>
-                          <p className="font-medium">{event.sourceLocation}</p>
-                        </div>
-                      )}
-                      
-                      {event.instruments && event.instruments.length > 0 && (
-                        <div className="mb-4">
-                          <p className="text-sm text-gray-400">Instruments</p>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {event.instruments.map((instrument, idx) => (
-                              <span
-                                key={idx}
-                                className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-sm"
-                              >
-                                {instrument.displayName}
-                              </span>
-                            ))}
-                          </div>
+                        <div className="mt-2">
+                          <p className="text-xs text-gray-400">Source</p>
+                          <p className="text-sm font-medium">{event.sourceLocation}</p>
                         </div>
                       )}
                     </div>

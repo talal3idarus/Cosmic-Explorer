@@ -27,6 +27,7 @@ const AsteroidsPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [fullscreenChart, setFullscreenChart] = useState<string | null>(null);
 
   useEffect(() => {
     // Set default date range (next 7 days)
@@ -425,69 +426,171 @@ const AsteroidsPage: React.FC = () => {
                 )}
               </div>
             ) : (
-              <div className="glass-card p-6">
-                <h3 className="text-xl font-semibold mb-6 flex items-center">
-                  <FaChartLine className="text-blue-400 mr-3" />
-                  Asteroid Analysis
-                </h3>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div>
-                    <h4 className="text-lg font-semibold mb-4">Size Distribution</h4>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={chartData}>
+              <div className="space-y-8">
+                {/* Size Distribution Chart */}
+                <div className="glass-card p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-2xl font-semibold flex items-center">
+                      <FaChartLine className="text-blue-400 mr-3" />
+                      Asteroid Size Distribution
+                    </h3>
+                    <button
+                      onClick={() => setFullscreenChart('size')}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+                    >
+                      <FaSearch />
+                      <span>Fullscreen</span>
+                    </button>
+                  </div>
+                  
+                  <div className="h-96">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={chartData.slice(0, 20)} margin={{ top: 20, right: 30, left: 20, bottom: 100 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis 
                           dataKey="name" 
-                          tick={{ fill: '#FFFFFF', fontSize: 12 }}
+                          tick={{ fill: '#FFFFFF', fontSize: 10 }}
                           angle={-45}
                           textAnchor="end"
-                          height={80}
+                          height={100}
+                          interval={0}
                         />
-                        <YAxis tick={{ fill: '#FFFFFF' }} />
+                        <YAxis 
+                          tick={{ fill: '#FFFFFF', fontSize: 12 }}
+                          label={{ value: 'Diameter (km)', angle: -90, position: 'insideLeft', style: { fill: '#FFFFFF' } }}
+                        />
                         <Tooltip 
                           contentStyle={{ 
                             backgroundColor: '#1F2937', 
                             border: '1px solid #374151',
                             borderRadius: '8px',
-                            color: '#F9FAFB'
+                            color: '#F9FAFB',
+                            fontSize: '14px'
                           }}
+                          formatter={(value: any, name: string) => [
+                            `${parseFloat(value).toFixed(3)} km`,
+                            'Diameter'
+                          ]}
+                          labelFormatter={(label) => `Asteroid: ${label}`}
                         />
-                        <Bar dataKey="diameter" fill="#3B82F6" />
+                        <Bar 
+                          dataKey="diameter" 
+                          fill="#3B82F6"
+                          radius={[4, 4, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
+                </div>
+
+                {/* Magnitude vs Size Chart */}
+                <div className="glass-card p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-2xl font-semibold flex items-center">
+                      <FaChartLine className="text-green-400 mr-3" />
+                      Magnitude vs Size Analysis
+                    </h3>
+                    <button
+                      onClick={() => setFullscreenChart('magnitude')}
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+                    >
+                      <FaSearch />
+                      <span>Fullscreen</span>
+                    </button>
+                  </div>
                   
-                  <div>
-                    <h4 className="text-lg font-semibold mb-4">Magnitude vs Size</h4>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={chartData}>
+                  <div className="h-96">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis 
                           dataKey="diameter" 
-                          tick={{ fill: '#FFFFFF' }}
+                          tick={{ fill: '#FFFFFF', fontSize: 12 }}
                           label={{ value: 'Diameter (km)', position: 'insideBottom', offset: -5, style: { fill: '#FFFFFF' } }}
                         />
                         <YAxis 
-                          tick={{ fill: '#FFFFFF' }}
-                          label={{ value: 'Magnitude', angle: -90, position: 'insideLeft', style: { fill: '#FFFFFF' } }}
+                          tick={{ fill: '#FFFFFF', fontSize: 12 }}
+                          label={{ value: 'Absolute Magnitude', angle: -90, position: 'insideLeft', style: { fill: '#FFFFFF' } }}
                         />
                         <Tooltip 
                           contentStyle={{ 
                             backgroundColor: '#1F2937', 
                             border: '1px solid #374151',
                             borderRadius: '8px',
-                            color: '#F9FAFB'
+                            color: '#F9FAFB',
+                            fontSize: '14px'
                           }}
+                          formatter={(value: any, name: string) => [
+                            `${parseFloat(value).toFixed(2)}`,
+                            name === 'magnitude' ? 'Magnitude' : 'Diameter (km)'
+                          ]}
+                          labelFormatter={(label) => `Diameter: ${parseFloat(label).toFixed(3)} km`}
                         />
                         <Line 
                           type="monotone" 
                           dataKey="magnitude" 
                           stroke="#10B981" 
-                          strokeWidth={2}
-                          dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
+                          strokeWidth={3}
+                          dot={{ fill: '#10B981', strokeWidth: 2, r: 6 }}
+                          activeDot={{ r: 8, stroke: '#10B981', strokeWidth: 2 }}
                         />
                       </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Hazardous Asteroids Chart */}
+                <div className="glass-card p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-2xl font-semibold flex items-center">
+                      <FaExclamationTriangle className="text-red-400 mr-3" />
+                      Hazardous Asteroids Overview
+                    </h3>
+                    <button
+                      onClick={() => setFullscreenChart('hazardous')}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+                    >
+                      <FaSearch />
+                      <span>Fullscreen</span>
+                    </button>
+                  </div>
+                  
+                  <div className="h-96">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={chartData.slice(0, 15)} margin={{ top: 20, right: 30, left: 20, bottom: 100 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis 
+                          dataKey="name" 
+                          tick={{ fill: '#FFFFFF', fontSize: 10 }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={100}
+                          interval={0}
+                        />
+                        <YAxis 
+                          tick={{ fill: '#FFFFFF', fontSize: 12 }}
+                          label={{ value: 'Hazardous (1=Yes, 0=No)', angle: -90, position: 'insideLeft', style: { fill: '#FFFFFF' } }}
+                        />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1F2937', 
+                            border: '1px solid #374151',
+                            borderRadius: '8px',
+                            color: '#F9FAFB',
+                            fontSize: '14px'
+                          }}
+                          formatter={(value: any) => [
+                            value === 1 ? 'Potentially Hazardous' : 'Not Hazardous',
+                            'Status'
+                          ]}
+                          labelFormatter={(label) => `Asteroid: ${label}`}
+                        />
+                        <Bar 
+                          dataKey="hazardous" 
+                          fill={(entry: any) => entry.hazardous === 1 ? '#EF4444' : '#10B981'}
+                          radius={[4, 4, 0, 0]}
+                        />
+                      </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
@@ -503,6 +606,156 @@ const AsteroidsPage: React.FC = () => {
             <FaMeteor className="text-4xl text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-300 mb-2">No Asteroids Found</h3>
             <p className="text-gray-400">Try adjusting your date range to find near-Earth objects.</p>
+          </motion.div>
+        )}
+
+        {/* Fullscreen Chart Modal */}
+        {fullscreenChart && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setFullscreenChart(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="w-full h-full max-w-7xl glass-card p-6 flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-3xl font-semibold">
+                  {fullscreenChart === 'size' && 'Asteroid Size Distribution'}
+                  {fullscreenChart === 'magnitude' && 'Magnitude vs Size Analysis'}
+                  {fullscreenChart === 'hazardous' && 'Hazardous Asteroids Overview'}
+                </h3>
+                <button
+                  onClick={() => setFullscreenChart(null)}
+                  className="text-gray-400 hover:text-white text-3xl font-bold"
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div className="flex-1 min-h-0">
+                {fullscreenChart === 'size' && (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData.slice(0, 20)} margin={{ top: 20, right: 30, left: 60, bottom: 120 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis 
+                        dataKey="name" 
+                        tick={{ fill: '#FFFFFF', fontSize: 12 }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={120}
+                        interval={0}
+                      />
+                      <YAxis 
+                        tick={{ fill: '#FFFFFF', fontSize: 14 }}
+                        label={{ value: 'Diameter (km)', angle: -90, position: 'insideLeft', style: { fill: '#FFFFFF', fontSize: '16px' } }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1F2937', 
+                          border: '1px solid #374151',
+                          borderRadius: '8px',
+                          color: '#F9FAFB',
+                          fontSize: '16px'
+                        }}
+                        formatter={(value: any, name: string) => [
+                          `${parseFloat(value).toFixed(3)} km`,
+                          'Diameter'
+                        ]}
+                        labelFormatter={(label) => `Asteroid: ${label}`}
+                      />
+                      <Bar 
+                        dataKey="diameter" 
+                        fill="#3B82F6"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+                
+                {fullscreenChart === 'magnitude' && (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ top: 20, right: 30, left: 60, bottom: 40 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis 
+                        dataKey="diameter" 
+                        tick={{ fill: '#FFFFFF', fontSize: 14 }}
+                        label={{ value: 'Diameter (km)', position: 'insideBottom', offset: -5, style: { fill: '#FFFFFF', fontSize: '16px' } }}
+                      />
+                      <YAxis 
+                        tick={{ fill: '#FFFFFF', fontSize: 14 }}
+                        label={{ value: 'Absolute Magnitude', angle: -90, position: 'insideLeft', style: { fill: '#FFFFFF', fontSize: '16px' } }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1F2937', 
+                          border: '1px solid #374151',
+                          borderRadius: '8px',
+                          color: '#F9FAFB',
+                          fontSize: '16px'
+                        }}
+                        formatter={(value: any, name: string) => [
+                          `${parseFloat(value).toFixed(2)}`,
+                          name === 'magnitude' ? 'Magnitude' : 'Diameter (km)'
+                        ]}
+                        labelFormatter={(label) => `Diameter: ${parseFloat(label).toFixed(3)} km`}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="magnitude" 
+                        stroke="#10B981" 
+                        strokeWidth={4}
+                        dot={{ fill: '#10B981', strokeWidth: 2, r: 8 }}
+                        activeDot={{ r: 12, stroke: '#10B981', strokeWidth: 3 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+                
+                {fullscreenChart === 'hazardous' && (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData.slice(0, 15)} margin={{ top: 20, right: 30, left: 60, bottom: 120 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis 
+                        dataKey="name" 
+                        tick={{ fill: '#FFFFFF', fontSize: 12 }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={120}
+                        interval={0}
+                      />
+                      <YAxis 
+                        tick={{ fill: '#FFFFFF', fontSize: 14 }}
+                        label={{ value: 'Hazardous (1=Yes, 0=No)', angle: -90, position: 'insideLeft', style: { fill: '#FFFFFF', fontSize: '16px' } }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1F2937', 
+                          border: '1px solid #374151',
+                          borderRadius: '8px',
+                          color: '#F9FAFB',
+                          fontSize: '16px'
+                        }}
+                        formatter={(value: any) => [
+                          value === 1 ? 'Potentially Hazardous' : 'Not Hazardous',
+                          'Status'
+                        ]}
+                        labelFormatter={(label) => `Asteroid: ${label}`}
+                      />
+                      <Bar 
+                        dataKey="hazardous" 
+                        fill={(entry: any) => entry.hazardous === 1 ? '#EF4444' : '#10B981'}
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </motion.div>
           </motion.div>
         )}
 

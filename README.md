@@ -111,6 +111,4 @@ Final-year Software Engineering student at UTAS, passionate about space, AI, and
 
 ---
 
-👉 I also recommend adding **Framer Motion** for animations and maybe **react-icons** for some futuristic icons. If you want, I can also create the **first draft codebase structure** (with homepage, nav, and one API integrated like APOD).  
-
-this is the key i got "fxMadvJCjMpbhQlq7OSd5iC2W3eKYrcCEQC6Irbd"
+👉 I also recommend adding **Framer Motion** for animations and maybe **react-icons** for some futuristic icons. If you want, I can also create the **first draft codebase structure** (with homepage, nav, and one API integrated like APOD). 
