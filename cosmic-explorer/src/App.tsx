@@ -1,7 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import Navbar from './components/Navbar';
+import { SidebarProvider, useSidebar } from './contexts/SidebarContext';
+import Sidebar from './components/Sidebar';
 import HomePage from './pages/HomePage';
 import APODPage from './pages/APODPage';
 import MarsRoverPage from './pages/MarsRoverPage';
@@ -11,23 +12,29 @@ import ExoplanetsPage from './pages/ExoplanetsPage';
 import NASALibraryPage from './pages/NASALibraryPage';
 import EPICPage from './pages/EPICPage';
 import LoadingSpinner from './components/LoadingSpinner';
-import TestComponent from './TestComponent';
 import CacheStatus from './components/CacheStatus';
 
-function App() {
+const AppContent: React.FC = () => {
+  const { isCollapsed, isMobile } = useSidebar();
+  
+  const getMainMargin = () => {
+    if (isMobile) return '0px';
+    return isCollapsed ? '80px' : '320px';
+  };
+
   return (
-    <Router>
-      <div className="min-h-screen bg-slate-50">
-        <Navbar />
-        <motion.main
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="relative"
-        >
+    <div className="min-h-screen bg-slate-900 flex">
+      <Sidebar />
+      <motion.main
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="flex-1 transition-all duration-300"
+        style={{ marginLeft: getMainMargin() }}
+      >
+        <div className="min-h-screen">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/test" element={<TestComponent />} />
             <Route path="/apod" element={<APODPage />} />
             <Route path="/mars-rover" element={<MarsRoverPage />} />
             <Route path="/asteroids" element={<AsteroidsPage />} />
@@ -36,11 +43,21 @@ function App() {
             <Route path="/nasa-library" element={<NASALibraryPage />} />
             <Route path="/epic" element={<EPICPage />} />
           </Routes>
-        </motion.main>
-        
-        {/* Cache Status Component */}
-        <CacheStatus />
-      </div>
+        </div>
+      </motion.main>
+      
+      {/* Cache Status Component */}
+      <CacheStatus />
+    </div>
+  );
+};
+
+function App() {
+  return (
+    <Router>
+      <SidebarProvider>
+        <AppContent />
+      </SidebarProvider>
     </Router>
   );
 }

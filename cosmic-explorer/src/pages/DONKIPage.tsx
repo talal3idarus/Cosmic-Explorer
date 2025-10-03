@@ -8,7 +8,9 @@ import {
   FaGlobe,
   FaSearch,
   FaFilter,
-  FaExternalLinkAlt
+  FaExternalLinkAlt,
+  FaChevronLeft,
+  FaChevronRight
 } from 'react-icons/fa';
 import { nasaApi } from '../services/nasaApi';
 import type { DONKIData } from '../services/nasaApi';
@@ -20,6 +22,8 @@ const DONKIPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedEventType, setSelectedEventType] = useState<string>('FLR');
   const [selectedEvent, setSelectedEvent] = useState<DONKIData | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const eventTypes = [
     { value: 'FLR', label: 'Solar Flares', description: 'Solar flare events' },
@@ -34,6 +38,7 @@ const DONKIPage: React.FC = () => {
 
   useEffect(() => {
     fetchDONKIData();
+    setCurrentPage(1); // Reset to first page when event type changes
   }, [selectedEventType]);
 
   const fetchDONKIData = async () => {
@@ -93,6 +98,17 @@ const DONKIPage: React.FC = () => {
       if (classType?.includes('C')) return { level: 'Low', color: 'text-yellow-400' };
     }
     return { level: 'Unknown', color: 'text-gray-400' };
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(donkiData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentEvents = donkiData.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
@@ -207,7 +223,7 @@ const DONKIPage: React.FC = () => {
               {eventTypes.find(et => et.value === selectedEventType)?.label} Events
             </h2>
             
-            {donkiData.map((event, index) => {
+            {currentEvents.map((event, index) => {
               const severity = getSeverityLevel(selectedEventType, event.classType);
               
               return (
@@ -281,6 +297,77 @@ const DONKIPage: React.FC = () => {
                 </motion.div>
               );
             })}
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="glass-card p-6 mt-8"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-400">
+                    Showing {startIndex + 1} to {Math.min(endIndex, donkiData.length)} of {donkiData.length} events
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-3 py-2 text-sm font-medium text-gray-400 bg-white/5 rounded-lg hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
+                    >
+                      <FaChevronLeft className="w-3 h-3" />
+                      <span>Previous</span>
+                    </button>
+                    
+                    <div className="flex space-x-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                        // Show first page, last page, current page, and pages around current page
+                        const shouldShow = 
+                          page === 1 || 
+                          page === totalPages || 
+                          (page >= currentPage - 2 && page <= currentPage + 2);
+                        
+                        if (!shouldShow) {
+                          // Show ellipsis for gaps
+                          if (page === 2 && currentPage > 4) {
+                            return <span key={`ellipsis-${page}`} className="px-2 py-2 text-gray-400">...</span>;
+                          }
+                          if (page === totalPages - 1 && currentPage < totalPages - 3) {
+                            return <span key={`ellipsis-${page}`} className="px-2 py-2 text-gray-400">...</span>;
+                          }
+                          return null;
+                        }
+                        
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                              currentPage === page
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-400 bg-white/5 hover:bg-white/10'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-2 text-sm font-medium text-gray-400 bg-white/5 rounded-lg hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
+                    >
+                      <span>Next</span>
+                      <FaChevronRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </motion.div>
         ) : !loading && (
           <motion.div

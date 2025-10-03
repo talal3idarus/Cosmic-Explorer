@@ -292,14 +292,14 @@ const ExoplanetsPage: React.FC = () => {
                 <XAxis 
                   dataKey="mass" 
                   name="Mass (Earth masses)"
-                  tick={{ fill: '#9CA3AF' }}
-                  label={{ value: 'Mass (Earth masses)', position: 'insideBottom', offset: -5 }}
+                  tick={{ fill: '#FFFFFF' }}
+                  label={{ value: 'Mass (Earth masses)', position: 'insideBottom', offset: -5, style: { fill: '#FFFFFF' } }}
                 />
                 <YAxis 
                   dataKey="radius" 
                   name="Radius (Earth radii)"
-                  tick={{ fill: '#9CA3AF' }}
-                  label={{ value: 'Radius (Earth radii)', angle: -90, position: 'insideLeft' }}
+                  tick={{ fill: '#FFFFFF' }}
+                  label={{ value: 'Radius (Earth radii)', angle: -90, position: 'insideLeft', style: { fill: '#FFFFFF' } }}
                 />
                 <Tooltip 
                   contentStyle={{ 
@@ -321,12 +321,12 @@ const ExoplanetsPage: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis 
                   dataKey="year" 
-                  tick={{ fill: '#9CA3AF' }}
-                  label={{ value: 'Year', position: 'insideBottom', offset: -5 }}
+                  tick={{ fill: '#FFFFFF' }}
+                  label={{ value: 'Year', position: 'insideBottom', offset: -5, style: { fill: '#FFFFFF' } }}
                 />
                 <YAxis 
-                  tick={{ fill: '#9CA3AF' }}
-                  label={{ value: 'Number of Discoveries', angle: -90, position: 'insideLeft' }}
+                  tick={{ fill: '#FFFFFF' }}
+                  label={{ value: 'Number of Discoveries', angle: -90, position: 'insideLeft', style: { fill: '#FFFFFF' } }}
                 />
                 <Tooltip 
                   contentStyle={{ 
@@ -347,10 +347,10 @@ const ExoplanetsPage: React.FC = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-red-50 border border-red-200 p-6 mb-8 rounded-2xl"
+            className="glass-card p-6 mb-8 border-red-500/50"
           >
             <div className="text-center">
-              <p className="text-red-600 mb-4">{error}</p>
+              <p className="text-red-400 mb-4">{error}</p>
               <button
                 onClick={fetchExoplanets}
                 className="cosmic-button"

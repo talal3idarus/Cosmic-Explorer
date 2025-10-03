@@ -4,6 +4,10 @@ import { extractRateLimitInfo } from './rateLimitMonitor';
 const NASA_API_KEY = import.meta.env.VITE_NASA_API_KEY || 'fxMadvJCjMpbhQlq7OSd5iC2W3eKYrcCEQC6Irbd';
 const BASE_URL = import.meta.env.VITE_NASA_API_BASE_URL || 'https://api.nasa.gov';
 
+// Debug logging
+console.log('🔑 NASA API Key loaded:', NASA_API_KEY ? '✅ Present' : '❌ Missing');
+console.log('🌐 Base URL:', BASE_URL);
+
 export interface APODData {
   date: string;
   explanation: string;
@@ -81,13 +85,13 @@ export interface DONKIData {
 export interface ExoplanetData {
   pl_name: string;
   hostname: string;
-  pl_orbper: number;
-  pl_bmasse: number;
-  pl_rade: number;
-  pl_eqt: number;
-  sy_dist: number;
+  pl_orbper: number | null;
+  pl_bmasse: number | null;
+  pl_rade: number | null;
+  pl_eqt: number | null;
+  sy_dist: number | null;
   discoverymethod: string;
-  disc_year: number;
+  disc_year: number | null;
 }
 
 export interface EPICData {
@@ -129,17 +133,35 @@ class NASAApiService {
     });
 
     try {
+      console.log('🌐 Making request to:', url.toString());
       const response = await fetch(url.toString());
+      
+      console.log('📡 Response status:', response.status, response.statusText);
       
       // Extract rate limit information
       extractRateLimitInfo(response, apiName);
       
       if (!response.ok) {
-        throw new Error(`NASA API Error: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('❌ API Error Response:', errorText);
+        
+        // Handle specific error cases
+        if (response.status === 403) {
+          throw new Error('NASA API Key is invalid or rate limited. Please check your API key.');
+        } else if (response.status === 429) {
+          throw new Error('NASA API rate limit exceeded. Please try again later.');
+        } else if (response.status === 400) {
+          throw new Error('Invalid request parameters. Please check the date format.');
+        }
+        
+        throw new Error(`NASA API Error: ${response.status} ${response.statusText} - ${errorText}`);
       }
-      return await response.json();
+      
+      const data = await response.json();
+      console.log('✅ API Response data:', data);
+      return data;
     } catch (error) {
-      console.error('NASA API Error:', error);
+      console.error('❌ NASA API Error:', error);
       throw error;
     }
   }
@@ -147,6 +169,8 @@ class NASAApiService {
   // APOD - Astronomy Picture of the Day
   async getAPOD(date?: string): Promise<APODData> {
     const cacheKey = CACHE_KEYS.APOD(date);
+    
+    console.log('🔍 APOD request - Date:', date, 'Cache key:', cacheKey);
     
     // Check cache first
     const cachedData = apiCache.get<APODData>(cacheKey);
@@ -157,13 +181,20 @@ class NASAApiService {
 
     // Fetch from API
     const params: Record<string, string> = date ? { date } : {};
-    const data = await this.fetchData<APODData>('/planetary/apod', params, 'apod');
+    console.log('🌐 Fetching APOD from API with params:', params);
     
-    // Cache the result
-    apiCache.set(cacheKey, data, CACHE_TTL.APOD);
-    console.log('🌐 APOD data fetched from API and cached');
-    
-    return data;
+    try {
+      const data = await this.fetchData<APODData>('/planetary/apod', params, 'apod');
+      
+      // Cache the result
+      apiCache.set(cacheKey, data, CACHE_TTL.APOD);
+      console.log('🌐 APOD data fetched from API and cached');
+      
+      return data;
+    } catch (error) {
+      console.error('❌ APOD API Error:', error);
+      throw error;
+    }
   }
 
   // Mars Rover Photos
@@ -322,29 +353,35 @@ class NASAApiService {
         {
           pl_name: "Kepler-452b",
           hostname: "Kepler-452",
-          disc_year: "2015",
+          disc_year: 2015,
           discoverymethod: "Transit",
-          pl_orbper: "384.843",
-          pl_bmasse: "5.1",
-          pl_rade: "1.63"
+          pl_orbper: 384.843,
+          pl_bmasse: 5.1,
+          pl_rade: 1.63,
+          pl_eqt: null,
+          sy_dist: null
         },
         {
           pl_name: "TRAPPIST-1e",
           hostname: "TRAPPIST-1",
-          disc_year: "2017",
+          disc_year: 2017,
           discoverymethod: "Transit",
-          pl_orbper: "6.099",
-          pl_bmasse: "0.692",
-          pl_rade: "0.910"
+          pl_orbper: 6.099,
+          pl_bmasse: 0.692,
+          pl_rade: 0.910,
+          pl_eqt: null,
+          sy_dist: null
         },
         {
           pl_name: "Proxima Centauri b",
           hostname: "Proxima Centauri",
-          disc_year: "2016",
+          disc_year: 2016,
           discoverymethod: "Radial Velocity",
-          pl_orbper: "11.186",
-          pl_bmasse: "1.27",
-          pl_rade: null
+          pl_orbper: 11.186,
+          pl_bmasse: 1.27,
+          pl_rade: null,
+          pl_eqt: null,
+          sy_dist: null
         }
       ];
       
@@ -439,6 +476,3 @@ class NASAApiService {
 }
 
 export const nasaApi = new NASAApiService();
-
-// Re-export types for easier importing
-export type { APODData, MarsRoverPhoto, MarsRoverResponse, AsteroidData, AsteroidsResponse, DONKIData, ExoplanetData, EPICData, NASALibraryItem };

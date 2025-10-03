@@ -22,11 +22,24 @@ const APODPage: React.FC = () => {
       setError(null);
       setIsImageLoading(true);
       
+      // Validate date if provided
+      if (date) {
+        const requestedDate = new Date(date);
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); // End of today
+        
+        if (requestedDate > today) {
+          throw new Error('Cannot request APOD data for future dates. Please select today or earlier.');
+        }
+      }
+      
+      console.log('Fetching APOD for date:', date);
       const data = await nasaApi.getAPOD(date);
+      console.log('APOD data received:', data);
       setApodData(data);
     } catch (err) {
-      setError('Failed to fetch APOD data. Please try again.');
-      console.error('APOD Error:', err);
+      console.error('APOD Error details:', err);
+      setError(`Failed to fetch APOD data: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -66,9 +79,12 @@ const APODPage: React.FC = () => {
   };
 
   const getTodayDate = () => {
-    const today = new Date().toISOString().split('T')[0];
-    setSelectedDate(today);
-    fetchAPOD(today);
+    const today = new Date();
+    // Ensure we don't request future dates (APOD API limitation)
+    const todayString = today.toISOString().split('T')[0];
+    console.log('Today date:', todayString);
+    setSelectedDate(todayString);
+    fetchAPOD(todayString);
   };
 
   if (loading) {
@@ -86,6 +102,29 @@ const APODPage: React.FC = () => {
           <div className="glass-card p-8">
             <h2 className="text-2xl font-semibold text-red-400 mb-4">Error</h2>
             <p className="text-gray-300 mb-6">{error}</p>
+            
+            {error.includes('API Key') && (
+              <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                <p className="text-blue-300 text-sm mb-2">
+                  <strong>Need a NASA API Key?</strong>
+                </p>
+                <p className="text-gray-300 text-sm mb-3">
+                  Get your free API key from{' '}
+                  <a 
+                    href="https://api.nasa.gov/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 underline"
+                  >
+                    https://api.nasa.gov/
+                  </a>
+                </p>
+                <p className="text-gray-400 text-xs">
+                  Then add it to your .env file as VITE_NASA_API_KEY=your_key_here
+                </p>
+              </div>
+            )}
+            
             <button
               onClick={() => fetchAPOD()}
               className="cosmic-button"

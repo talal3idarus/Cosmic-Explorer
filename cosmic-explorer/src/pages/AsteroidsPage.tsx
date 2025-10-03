@@ -8,7 +8,9 @@ import {
   FaRocket, 
   FaSearch,
   FaChartLine,
-  FaGlobe
+  FaGlobe,
+  FaChevronLeft,
+  FaChevronRight
 } from 'react-icons/fa';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { nasaApi } from '../services/nasaApi';
@@ -23,6 +25,8 @@ const AsteroidsPage: React.FC = () => {
   const [endDate, setEndDate] = useState<string>('');
   const [selectedAsteroid, setSelectedAsteroid] = useState<AsteroidData | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     // Set default date range (next 7 days)
@@ -37,6 +41,7 @@ const AsteroidsPage: React.FC = () => {
   useEffect(() => {
     if (startDate && endDate) {
       fetchAsteroids();
+      setCurrentPage(1); // Reset to first page when new data is fetched
     }
   }, [startDate, endDate]);
 
@@ -80,6 +85,22 @@ const AsteroidsPage: React.FC = () => {
     if (diameter < 0.5) return { category: 'Medium', color: 'text-yellow-400' };
     if (diameter < 1.0) return { category: 'Large', color: 'text-orange-400' };
     return { category: 'Very Large', color: 'text-red-400' };
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(asteroids.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentAsteroids = asteroids.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setCurrentPage(1);
+    // Note: itemsPerPage is currently constant, but this function is ready for future enhancement
   };
 
   // Prepare chart data
@@ -276,7 +297,7 @@ const AsteroidsPage: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/10">
-                      {asteroids.map((asteroid) => {
+                      {currentAsteroids.map((asteroid) => {
                         const sizeCategory = getSizeCategory(asteroid.estimated_diameter.kilometers.estimated_diameter_max);
                         const nextApproach = asteroid.close_approach_data[0];
                         
@@ -336,6 +357,72 @@ const AsteroidsPage: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="px-6 py-4 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-400">
+                        Showing {startIndex + 1} to {Math.min(endIndex, asteroids.length)} of {asteroids.length} asteroids
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className="px-3 py-2 text-sm font-medium text-gray-400 bg-white/5 rounded-lg hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
+                        >
+                          <FaChevronLeft className="w-3 h-3" />
+                          <span>Previous</span>
+                        </button>
+                        
+                        <div className="flex space-x-1">
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                            // Show first page, last page, current page, and pages around current page
+                            const shouldShow = 
+                              page === 1 || 
+                              page === totalPages || 
+                              (page >= currentPage - 2 && page <= currentPage + 2);
+                            
+                            if (!shouldShow) {
+                              // Show ellipsis for gaps
+                              if (page === 2 && currentPage > 4) {
+                                return <span key={`ellipsis-${page}`} className="px-2 py-2 text-gray-400">...</span>;
+                              }
+                              if (page === totalPages - 1 && currentPage < totalPages - 3) {
+                                return <span key={`ellipsis-${page}`} className="px-2 py-2 text-gray-400">...</span>;
+                              }
+                              return null;
+                            }
+                            
+                            return (
+                              <button
+                                key={page}
+                                onClick={() => handlePageChange(page)}
+                                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                  currentPage === page
+                                    ? 'bg-blue-600 text-white'
+                                    : 'text-gray-400 bg-white/5 hover:bg-white/10'
+                                }`}
+                              >
+                                {page}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        
+                        <button
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          className="px-3 py-2 text-sm font-medium text-gray-400 bg-white/5 rounded-lg hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
+                        >
+                          <span>Next</span>
+                          <FaChevronRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="glass-card p-6">
@@ -352,12 +439,12 @@ const AsteroidsPage: React.FC = () => {
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis 
                           dataKey="name" 
-                          tick={{ fill: '#9CA3AF', fontSize: 12 }}
+                          tick={{ fill: '#FFFFFF', fontSize: 12 }}
                           angle={-45}
                           textAnchor="end"
                           height={80}
                         />
-                        <YAxis tick={{ fill: '#9CA3AF' }} />
+                        <YAxis tick={{ fill: '#FFFFFF' }} />
                         <Tooltip 
                           contentStyle={{ 
                             backgroundColor: '#1F2937', 
@@ -378,12 +465,12 @@ const AsteroidsPage: React.FC = () => {
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis 
                           dataKey="diameter" 
-                          tick={{ fill: '#9CA3AF' }}
-                          label={{ value: 'Diameter (km)', position: 'insideBottom', offset: -5 }}
+                          tick={{ fill: '#FFFFFF' }}
+                          label={{ value: 'Diameter (km)', position: 'insideBottom', offset: -5, style: { fill: '#FFFFFF' } }}
                         />
                         <YAxis 
-                          tick={{ fill: '#9CA3AF' }}
-                          label={{ value: 'Magnitude', angle: -90, position: 'insideLeft' }}
+                          tick={{ fill: '#FFFFFF' }}
+                          label={{ value: 'Magnitude', angle: -90, position: 'insideLeft', style: { fill: '#FFFFFF' } }}
                         />
                         <Tooltip 
                           contentStyle={{ 

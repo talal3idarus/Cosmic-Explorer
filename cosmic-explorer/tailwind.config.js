@@ -7,6 +7,13 @@ export default {
   theme: {
     extend: {
       colors: {
+        nasa: {
+          red: '#DC2626',
+          blue: '#1E40AF',
+          white: '#FFFFFF',
+          dark: '#0F172A',
+          gray: '#64748B',
+        },
         cosmic: {
           50: '#f0f9ff',
           100: '#e0f2fe',
